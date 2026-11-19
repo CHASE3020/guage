@@ -113,6 +113,7 @@ backlog() {
     '6.5	type: docs	area: docs	docs(outreach): contact issuers, anchors and treasury teams' \
     '7.8	type: bug	area: model	fix(model): refuse a network verdict with no passphrase' \
     '7.9	type: feature	area: model	feat(model): type DeclaredFacts.Role as model.Role' \
+    '7.10	type: feature	area: model	feat(model): add Valid and Equal helpers to Thresholds and Flags' \
     'G1	type: test	area: rules	gate: every P0 requirement has passing tests' \
     'G2	type: test	area: rules	gate: every scenario has a fixture and expected findings' \
     'G3	type: test	area: cli	gate: fail-closed paths all exit non-zero' \
