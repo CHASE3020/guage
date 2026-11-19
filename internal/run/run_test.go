@@ -1154,7 +1154,7 @@ func TestAuditPrintsWhatThePolicyDeclared(t *testing.T) {
 	if declared == nil {
 		t.Fatal("a run behind a policy file printed no declaration")
 	}
-	if declared.Role != string(model.RoleTreasury) || declared.Name != "treasury" {
+	if declared.Role != model.RoleTreasury || declared.Name != "treasury" {
 		t.Errorf("declared role and name = %q, %q", declared.Role, declared.Name)
 	}
 	if declared.ExpectedSigners == nil || *declared.ExpectedSigners != 1 {
