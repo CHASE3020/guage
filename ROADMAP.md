@@ -1,6 +1,6 @@
 # ROADMAP: Gauge
 
-Last updated: 2026-11-09T13:57Z (remove working name references and add dynamic README metric sync with Shields.io endpoints)
+Last updated: 2026-11-19T10:00Z (security fixes #136, #137, #138: seed shape rejection, home domain validation, finding JSON keys)
 Roadmap version: 3
 
 This file is the single source of truth for remaining work. It is read before every task and updated after every change.
@@ -40,7 +40,7 @@ The repository is 100% ready when every task in Phases 0 to 6 is done and every 
 | 4 | Dogfood and release v0.1.0 | 2 | 9 | 22% |
 | 5 | v0.2 features | 3 | 11 | 27% |
 | 6 | Release v0.2.0 and community | 0 | 5 | 0% |
-| 7 (backlog) | Backlog | 0 | 4 | 0% |
+| 7 (backlog) | Backlog | 3 | 7 | 42% |
 | **Phases 0 to 6** | **Readiness total** | **56** | **79** | **70%** |
 | Gates | G1 to G10 | 3 | 10 | 30% |
 <!-- PROGRESS:END -->
@@ -226,6 +226,9 @@ Constraint on the two remaining experimental tasks: Gauge never builds or submit
 - [ ] **7.2** Claimable balances, liquidity pool shares and sponsorship analysis.
 - [ ] **7.3** Alert integrations (probably never; JSON and CI cover it).
 - [ ] **7.4** Cross-check issued assets against `stellar.toml` currencies.
+- [x] **7.5** security(policy): reject any 56-character base32 S token in a policy file, valid checksum or not. Implements #138.
+- [x] **7.6** security(policy): enforce SEP-1 hostname label rules in validHomeDomain at load time. Implements #137.
+- [x] **7.7** test(model): pin the exact seven JSON keys of Finding. Implements #136.
 
 ## 6. Dependency map (critical path)
 
@@ -276,6 +279,7 @@ Newest first. One row per merged change.
 
 | Date (UTC) | Change | Tasks |
 |---|---|---|
+| 2026-11-19 | security(policy): reject any 56-char base32 S token regardless of checksum validity (seed shape); enforce SEP-1 hostname label rules in validHomeDomain; pin Finding's seven JSON keys in a focused test. | 7.5, 7.6, 7.7 |
 | 2026-11-09 | Finalized project naming by removing all occurrences of "working name" across repository documentation, PRD, architecture, and roadmap files. Implemented dynamic README metrics synchronization (`scripts/sync_readme.py`) generating live Shields.io endpoint JSON files under `site/data/` for 200 tests and 16 rules, and enforced with `--check` in the `roadmap-check` workflow. | none ticked |
 | 2026-11-09 | Add Docs Live badge to README and prominent navigation links to the 7-page live documentation site. | none ticked |
 | 2026-11-09 | Task 5.11, the site's motion layer, on the owner's instruction to take animation inspiration from land-book.com across the org's docs sites. `site/assets/motion.css` and `motion.js` are loaded by all seven pages: sections, cards, ledger rows and tables drift up 22px as they enter the viewport with a 70ms sibling stagger, the hero plays a staged entrance in 90ms steps with the paper report card a longer 0.9s rise, the report then drifts up to 18px under scroll, nav underlines slide in, cards lift on hover, and scrollbars carry the palette. Everything is gated behind `prefers-reduced-motion: no-preference`, and the script returns before touching the DOM when reduce is set, verified by emulation: no motion attribute, no reveal classes, content fully visible. Verification was headless Chrome driven over CDP rather than eyeballing: all seven pages scrolled end to end, every reveal target intersected, zero elements stuck hidden, zero left carrying the reveal class after the entrance, zero console errors, the theme toggle dark to light and back, and a 390px render of the index. Two defects found and fixed on the way: a transition needs a painted before-state, so observation starts after two animation frames (defer scripts run before first paint, and above-fold sections were otherwise appearing instantly with the reveal class stuck on them), and a 1400ms fallback cleans up any element whose transition never runs. The layer is written to be shared verbatim with the Airlock and corpus sites: the accent resolves through each site's own tokens rather than a hardcoded color, and the scrollbar styling is static CSS rather than script-injected so it holds under Airlock's `style-src 'self'` CSP. No CLI change, no dependency, no build step. | 5.11 |

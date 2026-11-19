@@ -170,7 +170,41 @@ func validHomeDomain(domain string) bool {
 	if strings.ContainsAny(domain, " \t\r\n/@:?#[]") {
 		return false
 	}
-	return net.ParseIP(domain) == nil
+	if net.ParseIP(domain) != nil {
+		return false
+	}
+	for _, r := range domain {
+		if r > 0x7f {
+			return false
+		}
+		if r <= 0x20 || r == 0x7f {
+			return false
+		}
+		if !validHostRune(r) {
+			return false
+		}
+	}
+	labels := strings.Split(domain, ".")
+	if len(labels) < 2 {
+		return false
+	}
+	for _, label := range labels {
+		if len(label) == 0 || len(label) > 63 || label[0] == '-' || label[len(label)-1] == '-' {
+			return false
+		}
+	}
+	return true
+}
+
+func validHostRune(r rune) bool {
+	switch {
+	case r >= 'a' && r <= 'z', r >= 'A' && r <= 'Z', r >= '0' && r <= '9':
+		return true
+	case r == '-' || r == '.':
+		return true
+	default:
+		return false
+	}
 }
 
 func (a *Acceptance) validate(index int) error {
