@@ -1,6 +1,6 @@
 # ROADMAP: Gauge
 
-Last updated: 2026-11-24T03:40Z (tasks 7.68 to 7.73: source and SEP-1 boundary regression tests)
+Last updated: 2026-11-24T00:00Z (test(model): fingerprint is the final SortFindings tiebreak, so tied findings order identically after a shuffle)
 Roadmap version: 3
 
 This file is the single source of truth for remaining work. It is read before every task and updated after every change.
@@ -40,7 +40,7 @@ The repository is 100% ready when every task in Phases 0 to 6 is done and every 
 | 4 | Dogfood and release v0.1.0 | 4 | 9 | 44% |
 | 5 | v0.2 features | 10 | 11 | 90% |
 | 6 | Release v0.2.0 and community | 1 | 5 | 20% |
-| 7 (backlog) | Backlog | 66 | 70 | 94% |
+| 7 (backlog) | Backlog | 67 | 71 | 94% |
 | **Phases 0 to 6** | **Readiness total** | **70** | **80** | **87%** |
 | Gates | G1 to G10 | 8 | 10 | 80% |
 <!-- PROGRESS:END -->
@@ -296,6 +296,7 @@ Constraint on the two remaining experimental tasks: Gauge never builds or submit
 - [x] **7.71** test(sep1): record an oversized stellar.toml as StepSize, not a read. M. Deps: 3.5. Done when: `internal/sep1/size_test.go` serves exactly `MaxBody`, `MaxBody+1` and a chunked stream that flushes a kilobyte at a time and never ends; oversized cases assert `FailedAt == StepSize`, `Bytes == 0`, an empty `Identity` and the fixed detail with no served body bytes; the stream case also asserts a prompt return at the cap, and the tests fail when the `+1` is dropped from the limit. (done 2026-11-23; issue #151)
 - [x] **7.72** test(sep1): honour Retry-After on 429 and give up after the retry budget. M. Deps: 3.5. Done when: `internal/sep1/retry_test.go` injects a recording `sleep` and pins exactly `MaxRetries+1` attempts with delays of 1s, exponential backoff and a 5s cap for `Retry-After: 1`, no header and `120`, never the header's 120s; a 429, 429, 200 sequence reaches `StepOK` in three requests while 404 and 204 each stop after one. (done 2026-11-23; issue #152)
 - [x] **7.73** test(sep1): classify NAT64, 6to4, carrier NAT and unique local addresses. M. Deps: 3.5. Done when: `internal/sep1/ip_class_test.go` pins NAT64 zero-padding forms for private, loopback and public embedded IPv4, a near-NAT64 form with non-zero padding that must not unwrap, 6to4 forms embedding loopback, multicast, unspecified and private IPv4, and v4-mapped public and carrier NAT forms; every row asserts `Class`, `Class.String()` and `Dialable`. (done 2026-11-23; issue #153)
+- [x] **7.74** test(model): fingerprint is the final SortFindings tiebreak, so tied findings order identically after a shuffle. S. Deps: none. Done when: `SortFindings` compares severity descending, then account, rule ID and fingerprint ascending; `internal/model/sort_tiebreak_test.go` shuffles four tied findings into identical output; `TestSortFindingsIsStable` pins the fingerprint key; `go test ./internal/model -run 'TestSortFindings|TestSortTiebreak' -race -count=1` passes. Implements #127.
 ## 6. Dependency map (critical path)
 
 `0.2, 0.4 -> 1.1 -> 1.4 -> 2.1 -> 2.2, 2.3, 2.5 -> 2.7 -> 2.8 -> 2.9 -> 3.1 to 3.5 -> 3.7 -> 4.1 -> 4.8`
@@ -345,6 +346,7 @@ Newest first. One row per merged change.
 
 | Date (UTC) | Change | Tasks |
 |---|---|---|
+| 2026-11-24 | test(model): fingerprint is the final SortFindings tiebreak, so findings that tie on severity, account and rule order by their evidence digest and output is identical after a shuffle. Rewrote TestSortFindingsIsStable around the new key and added sort_tiebreak_test.go with a 50-shuffle permutation test. Closes #127. | 7.74 |
 | 2026-11-23 | Tasks 7.69 and 7.70 (close #173, close #174): pin the body cap boundary in `internal/source/limit_test.go` (a body of exactly `MaxBody` decodes, `MaxBody+1` returns `ErrTooLarge` after one request) and the passphrase no-echo promise in `internal/source/passphrase_test.go`, with a comment in `internal/source/source.go` recording that a whitespace-only expectation is compared. | 7.69, 7.70 |
 | 2026-11-23 | Task 7.68 (close #172): pin `backoffFor` across attempts 1 to 12 for bases of 1 ms, 200 ms and 4 s in `internal/source/backoff_test.go`, asserting the exact sequences, the 5 s ceiling, monotonicity and the unchanged base on attempt 1. | 7.68 |
 | 2026-11-05 | PI-1, the organization's issue contract, becomes the shape of every issue this repository generates. `scripts/generate_issues.sh` builds the marker line, a one-sentence brief and nine fixed sections: seven derived from the roadmap row, the area label and `AGENTS.md` sections 4 and 5, and two curated per task in a prose table the script now refuses to skip, so a roadmap row with no prose gets no issue. Gates ask for an observation and say plainly that a diff does not close one; owner acts say a contributor cannot take them; a wave tier rides in the marker only when the task's dependencies are ticked, and no issue gains a `Stellar Wave` label, because a GitHub tag fixes an issue at Trivial whatever the work turns out to be. `.github/ISSUE_TEMPLATE/task.yml` prefills the same nine headings, `CONTRIBUTING.md` points at the contract, and `scripts/test_issue_shape.sh` checks the shape inside `roadmap-check / gate`; it caught two generator faults before the first commit landed. Published the same morning, from this branch while its pull request was still open: `scripts/generate_issues.sh --update --apply` printed `0 created, 32 updated, 42 already present and unchanged`, and a read-back over the API of the 36 open issues finds 32 with the marker on line 1 and the nine headings in order, 4627 to 5359 characters apiece and each one byte-identical to what `--body-for` prints for its id, 9 carrying a wave tier and none carrying a `Stellar Wave` label. The four that stayed in the pre-PI-1 form are #42 (3.6), #43 (3.7), #66 (G1) and #67 (G2); their tasks are ticked, so the generator no longer has rows for them and closing them is the owner's bookkeeping. | 1.25 |
